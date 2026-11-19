@@ -13,23 +13,23 @@ The pipeline bridges historical granularity gaps between clinical investigation 
 flowchart TD
     subgraph Cloud ["Cloud Lakehouse (Databricks)"]
         direction LR
-        A[("Lab Requisitions &<br/>Investigations")]
+        A[("Lab Requisitions<br/>& Investigations")]
         B["OAuth 2.0<br/>Service Principal"]
     end
 
     subgraph ETL ["Python 3.12 Streaming Engine"]
         direction LR
-        C["Join & Type Casting<br/>(BigInt to String)"]
-        D["Chunked Streaming<br/>(50K rows / fetchmany)"]
-        E["Bulk Load Engine<br/>(pyodbc fast_executemany)"]
+        C["Join & Casting<br/>BigInt to String"]
+        D["Chunked Stream<br/>50K fetchmany"]
+        E["Bulk Insert<br/>fast_executemany"]
         C --> D --> E
     end
 
     subgraph OnPrem ["On-Premises SQL Server DW"]
         direction LR
-        F[("Staging Table<br/>(Truncate & Load)")]
-        G["Presentation View<br/>(Status Mapping)"]
-        H["SQL Server Agent<br/>(Daily CmdExec Job)"]
+        F[("Staging Table<br/>Truncate & Load")]
+        G["Reporting View<br/>Status Mapping"]
+        H["SQL Server Agent<br/>Daily CmdExec"]
         F --> G
     end
 
@@ -43,20 +43,21 @@ flowchart TD
 ```
 
 ## 3. Architecture & Engineering Highlights
-* **Memory-Safe High-Volume Streaming:** Uses Python 3.12 with `50,000`-row chunked extraction (`fetchmany`) paired with `pyodbc` `fast_executemany` bulk inserts to process **1.45M+ records** with minimal memory footprint.
-* **Secure OAuth 2.0 Authentication:** Authenticates against Databricks REST APIs using Service Principal (`client_credentials`) with environment-isolated configuration (`.env`).
-* **Cross-Platform Schema & Encoding Resolution:**
-  * Engineered `TRIM(CAST(... AS STRING))` join logic to resolve `BigInt`-to-`String` type mismatches and trailing whitespace that previously resulted in `NULL` investigation codes.
-  * Standardized UTF-8 character handling and specimen ID trimming during ingestion.
-* **Dynamic Date-Fallback & Input Validation:** Defaults to a full-year baseline (`YYYY-01-01`) for automated runs while supporting validated CLI date overrides (`ISO-8601`) for ad-hoc backfills.
-* **Decoupled Presentation Layer:** Separates raw ingestion (`dbo.Staging_Lab_Requisitions`) from business reporting logic (`dbo.vw_Lab_Report`), mapping raw laboratory statuses into strict binary outputs (`received` / `not received`).
-* **Zero-Touch Orchestration:** Automated daily via **SQL Server Agent** (`CmdExec` step) with structured execution logging.
+- **Memory-Safe High-Volume Streaming:** Uses Python 3.12 with `50,000`-row chunked extraction (`fetchmany`) paired with `pyodbc` `fast_executemany` bulk inserts to process **1.45M+ records** with minimal memory footprint.
+- **Secure OAuth 2.0 Authentication:** Authenticates against Databricks REST APIs using Service Principal (`client_credentials`) with environment-isolated configuration (`.env`).
+- **Cross-Platform Schema & Encoding Resolution:**
+  - Engineered `TRIM(CAST(... AS STRING))` join logic to resolve `BigInt`-to-`String` type mismatches and trailing whitespace that previously resulted in `NULL` investigation codes.
+  - Standardized UTF-8 character handling and specimen ID trimming during ingestion.
+- **Dynamic Date-Fallback & Input Validation:** Defaults to a full-year baseline (`YYYY-01-01`) for automated runs while supporting validated CLI date overrides (`ISO-8601`) for ad-hoc backfills.
+- **Decoupled Presentation Layer:** Separates raw ingestion (`dbo.Staging_Lab_Requisitions`) from business reporting logic (`dbo.vw_Lab_Report`), mapping raw laboratory statuses into strict binary outputs (`received` / `not received`).
+- **Zero-Touch Orchestration:** Automated daily via **SQL Server Agent** (`CmdExec` step) with structured execution logging.
 
 ## 4. Repository Structure
-* `src/etl_pipeline.py` — Sanitized Python 3.12 OAuth + chunked streaming ETL script.
-* `sql/vw_lab_report.sql` — SQL Server presentation view and UAT validation query.
-* `.env.example` — Environment variable template for secure credential isolation.
-* `requirements.txt` — Python dependency manifest.
+- `src/etl_pipeline.py` — Sanitized Python 3.12 OAuth + chunked streaming ETL script.
+- `SQL/vw_lab_report.sql` — SQL Server presentation view and UAT validation query.
+- `.env.example` — Environment variable template for secure credential isolation.
+- `.gitignore` — Excludes sensitive `.env` credentials, virtual environments, and cache artifacts.
+- `requirements.txt` — Python dependency manifest.
 
 ## 5. Quick Start (Reference Setup)
 1. Install dependencies:
