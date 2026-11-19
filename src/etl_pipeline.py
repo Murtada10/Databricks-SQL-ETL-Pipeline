@@ -1,3 +1,4 @@
+"""Cloud Databricks to SQL Server ETL Pipeline."""
 import datetime
 import logging
 import os
