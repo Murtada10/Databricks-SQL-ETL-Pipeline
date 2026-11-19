@@ -1,2 +1,4 @@
 *.py linguist-detectable=true
-*.sql linguist-detectable=true
+*.py linguist-vendored=false
+*.py linguist-generated=false
+*.py linguist-language=Python
