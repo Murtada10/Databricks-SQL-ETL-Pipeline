@@ -1,13 +1,35 @@
-# Databricks-SQL-ETL-Pipeline
+# Cloud Databricks to SQL Server ETL Pipeline
 
-# Cloud Databricks to SQL Server ETL Pipeline (Healthcare Lab Data Integration)
+> **Enterprise Confidentiality Notice (NDA):** This repository presents the reference architecture and a fully sanitized implementation of a production healthcare data integration pipeline. All proprietary server hostnames, credentials, schema identifiers, and organization-specific names have been redacted and replaced with generic placeholders.
 
 ## 1. Project Objective & Context
-End-to-end automated ETL pipeline extracting laboratory requisition records from a cloud Databricks Lakehouse and loading them into an on-premises enterprise SQL Server reporting warehouse for executive Power BI analytics.
+An automated, end-to-end ETL pipeline designed to extract **1.45M+ clinical laboratory requisition records** from a cloud **Databricks Lakehouse** and load them into an on-premises **SQL Server** reporting warehouse powering executive **Power BI** dashboards.
 
-## 2. Architecture & Engineering Highlights
-* **Source:** Cloud Databricks Lakehouse (relational join across laboratory requisitions and clinical investigation tables).
-* **Engine:** Python 3.12 utilizing 50,000-row chunked streaming (`fetchmany`) and `pyodbc` `fast_executemany` bulk inserts to process **1.45M+ records** with minimal memory overhead.
-* **Authentication:** OAuth 2.0 Service Principal token generation via REST API with environment-isolated credentials.
-* **Schema & Encoding Resolution:** Resolved cross-platform `BigInt`-to-`String` join mismatches (`TRIM(CAST(... AS STRING))`) and UTF-8 Arabic character encoding issues.
-* **Presentation & Automation:** Standardized business-logic reporting view orchestrated daily via automated SQL Server Agent jobs.
+The pipeline bridges historical granularity gaps between clinical investigation records and Laboratory Information System (LIS) reporting requirements, delivering clean, standardized datasets on a daily schedule.
+
+## 2. System Architecture
+
+```mermaid
+flowchart LR
+    subgraph Cloud ["Cloud Lakehouse (Databricks)"]
+        A[("Lab Requisitions &<br/>Investigations Tables")]
+        B["OAuth 2.0<br/>Service Principal"]
+    end
+
+    subgraph ETL ["Python 3.12 Streaming Engine"]
+        C["Cross-Table Join &<br/>Schema Casting"]
+        D["50,000-Row Chunked<br/>Streaming (fetchmany)"]
+        E["Bulk Load Engine<br/>pyodbc fast_executemany"]
+    end
+
+    subgraph OnPrem ["On-Premises SQL Server DW"]
+        F[("Staging Table<br/>Truncate & Load")]
+        G["Presentation View<br/>Status Standardization"]
+        H["SQL Server Agent<br/>Daily CmdExec Job"]
+    end
+
+    I["Executive Power BI<br/>Dashboards"]
+
+    B -->|Bearer Token| C
+    A --> C --> D --> E --> F --> G --> I
+    H -.->|Triggers Daily| C
