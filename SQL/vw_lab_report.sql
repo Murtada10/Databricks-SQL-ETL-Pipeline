@@ -9,7 +9,8 @@ SELECT
     PhysicianRequestDate AS [Physician Request Date],
     SampleID             AS [Sample ID],
     CASE
-        WHEN TestStatus IN ('Final', 'Complete', 'Submitted', 'Reported') THEN 'received'
+        WHEN UPPER(LTRIM(RTRIM(TestStatus))) IN ('FINAL', 'COMPLETE', 'SUBMITTED', 'REPORTED')
+            THEN 'received'
         ELSE 'not received'
     END                  AS [Lab Status],
     TestName             AS [Test Name],
@@ -17,15 +18,15 @@ SELECT
 FROM dbo.Staging_Lab_Requisitions;
 GO
 
--- UAT Validation Query
-SELECT TOP (100)
-    [National ID],
-    [Investigation ID],
-    [Investigation Code],
-    [Requisition Code],
-    [Physician Request Date],
-    [Sample ID],
-    [Lab Status],
-    [Test Name],
-    [Disease]
-FROM dbo.vw_Lab_Report;
+-- UAT Validation Query (run manually after ETL load)
+-- SELECT TOP (100)
+--     [National ID],
+--     [Investigation ID],
+--     [Investigation Code],
+--     [Requisition Code],
+--     [Physician Request Date],
+--     [Sample ID],
+--     [Lab Status],
+--     [Test Name],
+--     [Disease]
+-- FROM dbo.vw_Lab_Report;
