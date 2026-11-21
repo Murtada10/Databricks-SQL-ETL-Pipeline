@@ -55,6 +55,8 @@ flowchart TD
 ## 4. Repository Structure
 - `src/etl_pipeline.py` — Sanitized Python 3.12 OAuth + chunked streaming ETL script.
 - `SQL/vw_lab_report.sql` — SQL Server presentation view and UAT validation query.
+- `tests/test_etl_helpers.py` — Unit tests for batching, identifier normalization, and status mapping helpers.
+- `.github/workflows/ci.yml` — Automated GitHub Actions workflow running `pytest` on `main`.
 - `.env.example` — Environment variable template for secure credential isolation.
 - `.gitignore` — Excludes sensitive `.env` credentials, virtual environments, and cache artifacts.
 - `requirements.txt` — Python dependency manifest.
