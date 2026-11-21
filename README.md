@@ -52,7 +52,12 @@ flowchart TD
 - **Decoupled Presentation Layer:** Separates raw ingestion (`dbo.Staging_Lab_Requisitions`) from business reporting logic (`dbo.vw_Lab_Report`), mapping raw laboratory statuses into strict binary outputs (`received` / `not received`).
 - **Zero-Touch Orchestration:** Automated daily via **SQL Server Agent** (`CmdExec` step) with structured execution logging.
 
-## 4. Repository Structure
+## 4. Performance & Execution Snapshot
+- **Dataset Scale:** Extracts and loads **1.45M+** clinical laboratory requisition records from Databricks into the on-premises SQL Server reporting layer.
+- **Chunked Streaming & Bulk Load:** Streams records in controlled batches of **50,000** rows via `fetchmany` paired with `pyodbc` `fast_executemany` to sustain throughput with minimal memory overhead.
+- **Scheduled Automation:** Orchestrated for daily automated synchronization via **SQL Server Agent** (`CmdExec`).
+
+## 5. Repository Structure
 - `src/etl_pipeline.py` — Sanitized Python 3.12 OAuth + chunked streaming ETL script.
 - `SQL/vw_lab_report.sql` — SQL Server presentation view and UAT validation query.
 - `tests/test_etl_helpers.py` — Unit tests for batching, identifier normalization, and status mapping helpers.
@@ -61,7 +66,7 @@ flowchart TD
 - `.gitignore` — Excludes sensitive `.env` credentials, virtual environments, and cache artifacts.
 - `requirements.txt` — Python dependency manifest.
 
-## 5. Quick Start (Reference Setup)
+## 6. Quick Start (Reference Setup)
 1. Install dependencies:
    ```bash
    pip install -r requirements.txt
